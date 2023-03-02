@@ -60,7 +60,7 @@ public class MultithreadedClient extends Thread{
 						LiftRideEvent liftRideEvent = queue.take();
 //						String url = "http://localhost:8080/coen6731/skiers/" + Integer.toString(liftRideEvent.getResortID()) + "/seasons/" + 
 //								liftRideEvent.getSeasonID() + "/days/" + liftRideEvent.getDayID() + "/skiers/" + Integer.toString(liftRideEvent.getSkierID());
-						String url = "http://155.248.230.86:8080/skiers/" + Integer.toString(liftRideEvent.getResortID()) + "/seasons/" + 
+						String url = "http://155.248.230.86:9090/coen6731/skiers/" + Integer.toString(liftRideEvent.getResortID()) + "/seasons/" + 
 								liftRideEvent.getSeasonID() + "/days/" + liftRideEvent.getDayID() + "/skiers/" + Integer.toString(liftRideEvent.getSkierID());
 						String requestBody = new Gson().toJson(liftRideEvent.getLiftRide());
 						
@@ -133,7 +133,7 @@ public class MultithreadedClient extends Thread{
 	// calls the API before proceeding, to establish that you have connectivity.
     private boolean simpleClientTest(HttpClient client) {
 //		String serviceUrl =  "http://localhost:8080/coen6731/skiers/1/seasons/2022/days/281/skiers/1";
-		String serviceUrl =  "http://155.248.230.86:8080/skiers/1/seasons/2022/days/281/skiers/1";
+		String serviceUrl =  "http://155.248.230.86:9090/coen6731/skiers/1/seasons/2022/days/281/skiers/1";
 		LiftRide liftRide = new LiftRide((short)217,(short)21);
 		String requestBody = new Gson().toJson(liftRide);
 		HttpRequest request = HttpRequest.newBuilder()

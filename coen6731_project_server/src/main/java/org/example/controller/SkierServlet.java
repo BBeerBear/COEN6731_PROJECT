@@ -88,6 +88,7 @@ public class SkierServlet extends HttpServlet{
 	        		throw new Exception("season ID should not be empty");
 	        	}
 	        } catch (Exception e) {
+	        	// query value not valid
 	        	jsonObject = new JsonObject();
 	        	jsonObject.addProperty("message","Invalid input: " + e.getMessage());
 	        	String jsonString = gson.toJson(jsonObject);
@@ -115,6 +116,7 @@ public class SkierServlet extends HttpServlet{
 		        LiftRide liftRide= (LiftRide) gson.fromJson(requestBody, LiftRide.class);
 		        liftID = liftRide.getLiftID();
 		        time = liftRide.getTime();
+		        
 		        // validation
 		        if(liftID < 1 || liftID > 40) {
 		        	throw new Exception("liftID should be in range [1,40]");
@@ -122,8 +124,15 @@ public class SkierServlet extends HttpServlet{
 		        if(time < 1 || time > 360) {
 		        	throw new Exception("time should be in range [1,360]");
 		        }
+		        
+		        // If the request is valid, return a 200/201 response code and some dummy data as a response body.
 				response.setStatus(HttpServletResponse.SC_CREATED);
+		        LiftRideEvent liftRideEvent = new LiftRideEvent(resortID,seasonID,dayID,skierID,new LiftRide(liftID,time));
+				out.print(gson.toJson(liftRideEvent));
+                out.flush();
+			
 	        } catch (Exception e) {
+	        	// request body not valid
 	        	jsonObject = new JsonObject();
 	        	jsonObject.addProperty("message","Invalid input: " + e.getMessage());
 	        	String jsonString = gson.toJson(jsonObject);

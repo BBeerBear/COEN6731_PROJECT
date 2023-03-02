@@ -32,20 +32,23 @@ import com.google.gson.Gson;
 public class MultithreadedClient extends Thread{
 	private int num_of_thread;
 	private int num_of_requests_each_thread;
-	private final int MAX_RETRIES = 5;
-	private CsvWriter writer = null;
-	// Create a blocking queue for lift ride events
+	// retry times
+	private final int max_retries = 5;
+	// Create a blocking queue to store for generating lift ride events
 	private BlockingQueue<LiftRideEvent> queue = new LinkedBlockingQueue<>();
-	// Create a CSV file
+	// Create a CSV file to record each request
+	private CsvWriter writer = null;
 	String csvFilePath = "D:/Profiling Performance.csv";
-    public MultithreadedClient(int num_of_thread, int num_of_requests_each_thread) {
+    
+	public MultithreadedClient(int num_of_thread, int num_of_requests_each_thread) {
 		this.num_of_thread = num_of_thread;
 		this.num_of_requests_each_thread = num_of_requests_each_thread;
-    }
-    
+	}
+	
 	@Override
 	public void run() {
 		HttpClient client = HttpClient.newHttpClient();
+		// first test if the client have connectivity to the API
 		if(simpleClientTest(client)) {
 			System.out.println("You have connectivity to call the API...\n");
 		}else {
@@ -53,13 +56,17 @@ public class MultithreadedClient extends Thread{
 			return;		
 		}
 		
+		// successful requests
 		CountDownLatch successLatch = new CountDownLatch(num_of_thread * num_of_requests_each_thread);
+		// fail requests
 		CountDownLatch failureLatch = new CountDownLatch(num_of_thread * num_of_requests_each_thread);
 
+		// store each request time in thread-safe list
         List<Long> eachRequestTimes = Collections.synchronizedList(new ArrayList<Long>());
 
         ExecutorService executorService = Executors.newFixedThreadPool(num_of_thread);
-	    long startTime = System.currentTimeMillis();
+	   
+        long startTime = System.currentTimeMillis();
 	    try{
 	    	writer = new CsvWriter(csvFilePath);
 	    	String[] headers = {"start time", "request type", "latency(ms)", "response code"};
@@ -67,6 +74,7 @@ public class MultithreadedClient extends Thread{
 	        // Start the lift ride event generator thread
 	        LiftRideEventGeneratorThread generatorThread = new LiftRideEventGeneratorThread(queue,num_of_thread,num_of_requests_each_thread);
 	        generatorThread.start();
+	        
 			for(int i = 0; i < num_of_thread; i++) {
 				executorService.submit(()->{
 					for(int j = 0; j < num_of_requests_each_thread; j++) {
@@ -94,7 +102,7 @@ public class MultithreadedClient extends Thread{
 							
 							int retries = 0;
 							// Retry up to MAX_RETRIES times for 4XX and 5XX response codes
-							while (response.statusCode() >= 400 && retries < MAX_RETRIES) {
+							while (response.statusCode() >= 400 && retries < max_retries) {
 								retries++;
 								System.out.println("Request failed with status code " + response.statusCode() + ", retrying (attempt " + retries + ")");
 								response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -106,7 +114,7 @@ public class MultithreadedClient extends Thread{
 							writer.write(csvLine);
 							// Check if the request was successful
 							if (response.statusCode() >= 400) {
-								System.out.println("Request failed after " + MAX_RETRIES + " retries with status code " + response.statusCode());
+								System.out.println("Request failed after " + max_retries + " retries with status code " + response.statusCode());
 								successLatch.countDown();
 							} else {
 	//							assertThat(response.statusCode(), equalTo(201));
@@ -148,7 +156,7 @@ public class MultithreadedClient extends Thread{
 	    
 	    
 	    System.out.println("Mean response time: " + meanResponseTime + "ms");
-	    System.out.println("Median response time: " + meanResponseTime + "ms");
+	    System.out.println("Median response time: " + medianResponseTime + "ms");
 	    System.out.println("Throughput: " + throughput + " requests/second");
 	    System.out.println("P99 response time: " + p99ResponseTime + "ms");
 	    System.out.println("Min response time: " + minResponseTime + "ms");

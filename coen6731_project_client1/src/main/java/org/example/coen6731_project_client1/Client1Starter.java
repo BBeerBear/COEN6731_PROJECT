@@ -31,8 +31,8 @@ import com.google.gson.Gson;
  */
 public class Client1Starter
 {
-//	private static final int NUM_THREADS = 32;
-//	private static final int NUM_POST_REQUESTS_PER_THREAD = 1000;
+	//	private static final int NUM_THREADS = 32;
+	//	private static final int NUM_POST_REQUESTS_PER_THREAD = 1000;
 	
     public static void main( String[] args )
     {
@@ -55,6 +55,7 @@ public class Client1Starter
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+        System.out.println();
         
         // Once any of these have completed you are free to create as few or as many threads as you like until all the 10K POSTS have been sent.
         MultithreadedClient multithreadedClient3 = new MultithreadedClient(1, 500);

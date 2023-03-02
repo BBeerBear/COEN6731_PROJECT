@@ -58,7 +58,8 @@ public class MultithreadedClient extends Thread{
 					try {
 						long requestStartTime = System.currentTimeMillis();
 						LiftRideEvent liftRideEvent = queue.take();
-						String url = "http://localhost:8080/coen6731/skiers/" + Integer.toString(liftRideEvent.getResortID()) + "/seasons/" + liftRideEvent.getSeasonID() + "/days/" + liftRideEvent.getDayID() + "/skiers/" + Integer.toString(liftRideEvent.getSkierID());
+						String url = "http://localhost:8080/coen6731/skiers/" + Integer.toString(liftRideEvent.getResortID()) + "/seasons/" + 
+								liftRideEvent.getSeasonID() + "/days/" + liftRideEvent.getDayID() + "/skiers/" + Integer.toString(liftRideEvent.getSkierID());
 						String requestBody = new Gson().toJson(liftRideEvent.getLiftRide());
 						
 						
@@ -84,7 +85,6 @@ public class MultithreadedClient extends Thread{
 							System.out.println("Request failed after " + MAX_RETRIES + " retries with status code " + response.statusCode());
 							successLatch.countDown();
 						} else {
-//							assertThat(response.statusCode(), equalTo(201));
 //				            System.out.println("Request successful with status code " + response.statusCode());
 							failureLatch.countDown();
 						}
@@ -116,14 +116,12 @@ public class MultithreadedClient extends Thread{
 	    	totalRequestTime += time;
 	    }
 	    
+	    System.out.println("Number or threads used: " + num_of_thread + ", number of requests each thread: " + num_of_requests_each_thread);
 	    // expected throughput λ = L / W
 	    double w_averageTimeEachRequest = (double) totalRequestTime / eachRequestTimes.size();
-//	    System.out.println(totalRequestTime + "ms");
-//	    System.out.println(eachRequestTimes.size());
-	    System.out.println("Each request latency: " + w_averageTimeEachRequest + "ms");
-//	    System.out.println();
 	    double λ_expectedThroughput = num_of_thread / (w_averageTimeEachRequest / 1000);
 	   
+	    System.out.println("Each request latency: " + w_averageTimeEachRequest + "ms");
         System.out.println("Number of successful requests sent: " + successfulRequests);
         System.out.println("Number of unsuccessful requests: " + unsuccessfulRequests);
         System.out.println("Total run time: " + wallTime + " ms");

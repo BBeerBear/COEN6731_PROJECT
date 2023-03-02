@@ -36,9 +36,6 @@ public class Client1Starter
 	
     public static void main( String[] args )
     {
-    	// Create a blocking queue for lift ride events
-        BlockingQueue<LiftRideEvent> queue = new LinkedBlockingQueue<>();
-        
         
         // At startup, you must create 32 threads that each send 1000 POST requests and terminate.
         MultithreadedClient multithreadedClient = new MultithreadedClient(32, 1000);
@@ -69,6 +66,5 @@ public class Client1Starter
 		}
 
     }
-    
     
 }

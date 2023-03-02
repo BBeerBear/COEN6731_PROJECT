@@ -1,7 +1,5 @@
 package org.example.coen6731_project_client1.controller;
 
-
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;

@@ -80,15 +80,13 @@ public class MultithreadedClient extends Thread{
 					for(int j = 0; j < num_of_requests_each_thread; j++) {
 						try {
 							long requestStartTime = System.currentTimeMillis();
-//							Date currentDate = new Date(requestStartTime);
-//							SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-//							String requestStartTimeString = dateFormat.format(currentDate);
 							String requestStartTimeString = Long.toString(requestStartTime);
 							
 							LiftRideEvent liftRideEvent = queue.take();
-							String url = "http://localhost:8080/coen6731/skiers/" + Integer.toString(liftRideEvent.getResortID()) + "/seasons/" + liftRideEvent.getSeasonID() + "/days/" + liftRideEvent.getDayID() + "/skiers/" + Integer.toString(liftRideEvent.getSkierID());
+//							String url = "http://localhost:8080/coen6731/skiers/" + Integer.toString(liftRideEvent.getResortID()) + "/seasons/" + liftRideEvent.getSeasonID() + "/days/" + liftRideEvent.getDayID() + "/skiers/" + Integer.toString(liftRideEvent.getSkierID());
+							String url = "http://155.248.230.86:8080/skiers/" + Integer.toString(liftRideEvent.getResortID()) + "/seasons/" + 
+									liftRideEvent.getSeasonID() + "/days/" + liftRideEvent.getDayID() + "/skiers/" + Integer.toString(liftRideEvent.getSkierID());
 							String requestBody = new Gson().toJson(liftRideEvent.getLiftRide());
-							
 							
 							HttpRequest request = HttpRequest.newBuilder()
 									  .uri(URI.create(url))
@@ -112,12 +110,12 @@ public class MultithreadedClient extends Thread{
 							String responseCode = Integer.toString(response.statusCode());
 							String[] csvLine = {requestStartTimeString, "POST", latencyString, responseCode};
 							writer.write(csvLine);
+							
 							// Check if the request was successful
 							if (response.statusCode() >= 400) {
 								System.out.println("Request failed after " + max_retries + " retries with status code " + response.statusCode());
 								successLatch.countDown();
 							} else {
-	//							assertThat(response.statusCode(), equalTo(201));
 	//				            System.out.println("Request successful with status code " + response.statusCode());
 								failureLatch.countDown();
 							}
@@ -154,29 +152,25 @@ public class MultithreadedClient extends Thread{
 	    long minResponseTime = Collections.min(eachRequestTimes);
 	    long maxResponseTime = Collections.max(eachRequestTimes);
 	    
+	    // expected throughput λ = L / W
+	    double w_averageTimeEachRequest = (double) totalResponseTime / eachRequestTimes.size();
+	    double λ_expectedThroughput = num_of_thread / (w_averageTimeEachRequest / 1000);
 	    
+	    System.out.println("Number or threads used: " + num_of_thread + ", number of requests each thread: " + num_of_requests_each_thread);
 	    System.out.println("Mean response time: " + meanResponseTime + "ms");
 	    System.out.println("Median response time: " + medianResponseTime + "ms");
 	    System.out.println("Throughput: " + throughput + " requests/second");
+	    System.out.println("According to Little's Law, expected throughput is: " + λ_expectedThroughput + " requests/second");
 	    System.out.println("P99 response time: " + p99ResponseTime + "ms");
 	    System.out.println("Min response time: " + minResponseTime + "ms");
 	    System.out.println("Max response time: " + maxResponseTime + "ms");
 	    
-////	    System.out.println(totalRequestTime + "ms");
-////	    System.out.println(eachRequestTimes.size());
-//	    System.out.println("Each request latency: " + w_averageTimeEachRequest + "ms");
-////	    System.out.println();
-//	    double λ_expectedThroughput = num_of_thread / (w_averageTimeEachRequest / 1000);
-//	   
-//        System.out.println("Number of successful requests sent: " + successfulRequests);
-//        System.out.println("Number of unsuccessful requests: " + unsuccessfulRequests);
-//        System.out.println("Total run time: " + wallTime + " ms");
-//        System.out.println("According to Little's Law, expected throughput is: " + λ_expectedThroughput + " requests/second");
 	}
     
 	// calls the API before proceeding, to establish that you have connectivity.
     private boolean simpleClientTest(HttpClient client) {
-		String serviceUrl =  "http://localhost:8080/coen6731/skiers/1/seasons/2022/days/281/skiers/1";
+//		String serviceUrl =  "http://localhost:8080/coen6731/skiers/1/seasons/2022/days/281/skiers/1";
+		String serviceUrl =  "http://155.248.230.86:8080/skiers/1/seasons/2022/days/281/skiers/1";
 		LiftRide liftRide = new LiftRide((short)217,(short)21);
 		String requestBody = new Gson().toJson(liftRide);
 		HttpRequest request = HttpRequest.newBuilder()
